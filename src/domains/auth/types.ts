@@ -1,3 +1,5 @@
+import type { ReactNode, ChangeEvent } from "react";
+
 export interface User {
   id: string;
   email: string;
@@ -30,9 +32,9 @@ export interface AuthField {
   label: string;
   type: string;
   placeholder: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   minLength?: number;
   required?: boolean;
 }

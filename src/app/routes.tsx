@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "@/app/store";
@@ -20,10 +20,16 @@ function GuestRoute({ children }: { children: React.ReactNode }) {
 export default function AppRoutes() {
   const dispatch = useDispatch<AppDispatch>();
   const { accessToken } = useSelector((state: RootState) => state.auth);
+  const didFetchMe = useRef(false);
 
   useEffect(() => {
-    if (accessToken) {
+    // Ne fetch qu'une seule fois au mount, pas à chaque changement de token
+    if (accessToken && !didFetchMe.current) {
+      didFetchMe.current = true;
       dispatch(fetchMe());
+    }
+    if (!accessToken) {
+      didFetchMe.current = false;
     }
   }, [dispatch, accessToken]);
 

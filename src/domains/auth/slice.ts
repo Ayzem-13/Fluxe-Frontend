@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { isAxiosError } from "axios";
-import { authApi } from "@/domains/auth/api";
+import { registerUser, loginUser, fetchCurrentUser, logoutUser } from "@/domains/auth/service";
 import type { AuthState, LoginPayload, RegisterPayload } from "@/domains/auth/types";
 
 const initialState: AuthState = {
@@ -14,13 +13,9 @@ export const register = createAsyncThunk(
   "auth/register",
   async (data: RegisterPayload, { rejectWithValue }) => {
     try {
-      const res = await authApi.register(data);
-      return res.data;
+      await registerUser(data);
     } catch (err) {
-      if (isAxiosError(err)) {
-        return rejectWithValue(err.response?.data?.error ?? "Erreur inscription");
-      }
-      return rejectWithValue("Erreur inscription");
+      return rejectWithValue((err as Error).message);
     }
   }
 );
@@ -29,14 +24,9 @@ export const login = createAsyncThunk(
   "auth/login",
   async (data: LoginPayload, { rejectWithValue }) => {
     try {
-      const res = await authApi.login(data);
-      localStorage.setItem("accessToken", res.data.accessToken);
-      return res.data;
+      return await loginUser(data);
     } catch (err) {
-      if (isAxiosError(err)) {
-        return rejectWithValue(err.response?.data?.error ?? "Erreur connexion");
-      }
-      return rejectWithValue("Erreur connexion");
+      return rejectWithValue((err as Error).message);
     }
   }
 );
@@ -44,20 +34,17 @@ export const login = createAsyncThunk(
 export const fetchMe = createAsyncThunk(
   "auth/fetchMe",
   async (_, { getState, rejectWithValue }) => {
-    const token = (getState() as { auth: AuthState }).auth.accessToken;
-    if (!token) return rejectWithValue("No token");
+    const hasToken = !!(getState() as { auth: AuthState }).auth.accessToken;
     try {
-      const res = await authApi.me(token);
-      return (res.data.user ?? res.data) as AuthState["user"];
-    } catch {
-      return rejectWithValue("Session expirée");
+      return await fetchCurrentUser(hasToken);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
     }
   }
 );
 
 export const logout = createAsyncThunk("auth/logout", async () => {
-  await authApi.logout();
-  localStorage.removeItem("accessToken");
+  await logoutUser();
 });
 
 const authSlice = createSlice({
@@ -66,6 +53,9 @@ const authSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+    },
+    setAccessToken: (state, action: { payload: string }) => {
+      state.accessToken = action.payload || null;
     },
   },
   extraReducers: (builder) => {
@@ -102,12 +92,12 @@ const authSlice = createSlice({
         state.user = action.payload ?? null;
       })
       .addCase(fetchMe.rejected, (state) => {
+        // Do not clear the token here — the axios interceptor handles refresh.
+        // If refresh also fails, the interceptor clears the token via setAccessToken("").
         state.user = null;
-        state.accessToken = null;
-        localStorage.removeItem("accessToken");
       });
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, setAccessToken } = authSlice.actions;
 export default authSlice.reducer;
