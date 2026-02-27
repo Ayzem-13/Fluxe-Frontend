@@ -35,7 +35,6 @@ export interface AuthField {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   minLength?: number;
   required?: boolean;
-  fieldError?: string;
 }
 
 export interface AuthPageProps {

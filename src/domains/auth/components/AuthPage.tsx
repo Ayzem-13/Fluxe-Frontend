@@ -38,17 +38,15 @@ export function AuthPage({ mode, fields, onSubmit, isLoading, linkTo, linkLabel,
           <FluxeLogo className="size-10" />
           <span className="text-2xl font-bold">Fluxe</span>
         </div>
-        <div>
-          <p className="text-4xl font-bold leading-tight text-foreground">
-            {mode === "login" ? "Content de vous revoir." : "Rejoignez la conversation."}
-          </p>
-          <p className="mt-4 text-muted-foreground text-lg">
-            {mode === "login"
-              ? "Connectez-vous pour retrouver votre fil d'actualité."
-              : "Créez votre compte et commencez à partager."}
-          </p>
+        <div className="flex justify-center">
+          <FluxeLogo className="size-56 opacity-90" />
         </div>
-        <p className="text-sm text-muted-foreground">© 2025 Fluxe</p>
+        <div>
+          <p className="text-xl font-semibold text-foreground">
+            "Partagez vos idées avec le monde, en un instant."
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">— L'équipe Fluxe</p>
+        </div>
       </div>
 
       {/* Right panel */}
@@ -64,9 +62,12 @@ export function AuthPage({ mode, fields, onSubmit, isLoading, linkTo, linkLabel,
             <span className="text-xl font-bold">Fluxe</span>
           </div>
 
-          <h2 className="text-2xl font-bold mb-6">
-            {mode === "login" ? "Connexion" : "Inscription"}
+          <h2 className="text-2xl font-bold">
+            {mode === "login" ? "Connexion" : "Créer un compte"}
           </h2>
+          <p className="text-sm text-muted-foreground mt-1 mb-6">
+            {mode === "login" ? "Content de vous revoir." : "Rejoignez Fluxe dès maintenant."}
+          </p>
 
           <form
             onSubmit={(e) => {
@@ -112,15 +113,6 @@ export function AuthPage({ mode, fields, onSubmit, isLoading, linkTo, linkLabel,
                       </button>
                     )}
                   </div>
-                  {field.fieldError && (
-                    <motion.p
-                      className="text-xs text-destructive"
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    >
-                      {field.fieldError}
-                    </motion.p>
-                  )}
                 </motion.div>
               );
             })}

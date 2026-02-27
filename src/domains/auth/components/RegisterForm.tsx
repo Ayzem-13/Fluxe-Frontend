@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User } from "lucide-react";
+import { toast } from "sonner";
 import { register, clearError } from "@/domains/auth/slice";
 import { AuthPage } from "@/domains/auth/components/AuthPage";
 import type { AppDispatch, RootState } from "@/app/store";
@@ -9,35 +10,40 @@ import type { AppDispatch, RootState } from "@/app/store";
 export default function RegisterForm() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { isLoading } = useSelector((state: RootState) => state.auth);
 
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    setLocalError(null);
     dispatch(clearError());
 
-    if (password !== confirmPassword) {
-      setLocalError("Les mots de passe ne correspondent pas");
+    if (!email) {
+      toast.error("L'email est requis");
+      return;
+    }
+    if (!username) {
+      toast.error("Le nom d'utilisateur est requis");
       return;
     }
     if (password.length < 6) {
-      setLocalError("Le mot de passe doit contenir au moins 6 caractères");
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas");
       return;
     }
 
     const result = await dispatch(register({ email, username, password }));
     if (register.fulfilled.match(result)) {
       navigate("/login");
+    } else {
+      toast.error(result.payload as string ?? "Erreur lors de l'inscription");
     }
   };
-
-  const emailError = error === "Email déjà utilisé" ? error : undefined;
-  const usernameError = error === "Nom d'utilisateur déjà utilisé" ? error : undefined;
 
   return (
     <AuthPage
@@ -57,7 +63,6 @@ export default function RegisterForm() {
           value: email,
           onChange: (e) => setEmail(e.target.value),
           required: true,
-          fieldError: emailError,
         },
         {
           id: "username",
@@ -68,7 +73,6 @@ export default function RegisterForm() {
           value: username,
           onChange: (e) => setUsername(e.target.value),
           required: true,
-          fieldError: usernameError,
         },
         {
           id: "password",
@@ -90,7 +94,6 @@ export default function RegisterForm() {
           value: confirmPassword,
           onChange: (e) => setConfirmPassword(e.target.value),
           required: true,
-          fieldError: localError ?? undefined,
         },
       ]}
     />
