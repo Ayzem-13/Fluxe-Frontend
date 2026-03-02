@@ -5,6 +5,7 @@ import { PostFab } from "@/components/layout/PostFab";
 import { ComposerModal } from "@/components/layout/ComposerModal";
 import { TweetComposer } from "@/domains/tweets/components/TweetComposer";
 import { TweetFeed } from "@/domains/tweets/components/TweetFeed";
+import { FeedTabs } from "@/domains/tweets/components/FeedTabs";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 
 export default function Home() {
@@ -17,8 +18,8 @@ export default function Home() {
       <DesktopSidebar onCompose={() => setComposerOpen(true)} />
 
       <main className={`flex-1 ${marginLeft} overflow-y-auto pb-20 md:pb-0`}>
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
-          <h1 className="text-xl font-bold">Accueil</h1>
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+          <FeedTabs />
         </div>
 
         <div className="hidden md:block border-b border-border">

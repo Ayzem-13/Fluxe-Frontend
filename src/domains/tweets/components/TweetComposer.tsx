@@ -99,7 +99,7 @@ export function TweetComposer({
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Quoi de neuf ?"
-            maxLength={320}
+            maxLength={MAX}
             rows={isModal ? 4 : 1}
             autoFocus={autoFocus}
             className={cn(
