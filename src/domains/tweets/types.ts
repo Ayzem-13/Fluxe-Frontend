@@ -15,6 +15,8 @@ export interface Tweet {
   _count: { likes: number };
 }
 
+export type FeedSort = "recent" | "trending" | "following";
+
 export interface TweetsState {
   items: Tweet[];
   nextCursor: string | null;
@@ -22,6 +24,7 @@ export interface TweetsState {
   isCreating: boolean;
   error: string | null;
   hasFetched: boolean;
+  sort: FeedSort;
 }
 
 export interface CreateTweetPayload {
@@ -36,4 +39,9 @@ export interface UpdateTweetPayload {
 export interface FetchTweetsResponse {
   tweets: Tweet[];
   nextCursor: string | null;
+}
+
+export interface LikeResponse {
+  liked: boolean;
+  likesCount: number;
 }

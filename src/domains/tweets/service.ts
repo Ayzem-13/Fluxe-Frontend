@@ -2,9 +2,11 @@ import { tweetsApi } from "./api";
 import { extractErrorMessage } from "@/utils/errors";
 import type {
   Tweet,
+  FeedSort,
   CreateTweetPayload,
   UpdateTweetPayload,
   FetchTweetsResponse,
+  LikeResponse,
 } from "./types";
 
 /**
@@ -13,10 +15,11 @@ import type {
  */
 export async function getTweets(
   cursor?: string,
-  limit = 20
+  limit = 20,
+  sort: FeedSort = "recent"
 ): Promise<FetchTweetsResponse> {
   try {
-    const res = await tweetsApi.getAll(cursor, limit);
+    const res = await tweetsApi.getAll(cursor, limit, sort);
     const data = res.data;
     if (Array.isArray(data)) {
       return { tweets: data as Tweet[], nextCursor: null };
@@ -42,6 +45,16 @@ export async function editTweet(data: UpdateTweetPayload): Promise<Tweet> {
     return res.data as Tweet;
   } catch (err) {
     throw new Error(extractErrorMessage(err, "Failed to update tweet"));
+  }
+}
+
+/** Toggles like on a tweet. Returns the new like state and count. */
+export async function toggleLike(id: string): Promise<LikeResponse & { tweetId: string }> {
+  try {
+    const res = await tweetsApi.like(id);
+    return { ...(res.data as LikeResponse), tweetId: id };
+  } catch (err) {
+    throw new Error(extractErrorMessage(err, "Failed to like tweet"));
   }
 }
 

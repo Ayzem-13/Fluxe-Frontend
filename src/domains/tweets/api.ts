@@ -2,9 +2,9 @@ import { axiosInstance } from "@/lib/axios";
 import type { CreateTweetPayload, UpdateTweetPayload } from "./types";
 
 export const tweetsApi = {
-  getAll: (cursor?: string, limit = 20) =>
+  getAll: (cursor?: string, limit = 20, sort = "recent") =>
     axiosInstance.get("/tweets", {
-      params: { limit, ...(cursor ? { cursor } : {}) },
+      params: { limit, sort, ...(cursor ? { cursor } : {}) },
     }),
 
   create: (data: CreateTweetPayload) =>
@@ -15,4 +15,7 @@ export const tweetsApi = {
 
   remove: (id: string) =>
     axiosInstance.delete(`/tweets/${id}`),
+
+  like: (id: string) =>
+    axiosInstance.post(`/tweets/${id}/like`),
 };

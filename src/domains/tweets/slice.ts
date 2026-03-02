@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getTweets, postTweet, editTweet, removeTweet } from "@/domains/tweets/service";
+import { getTweets, postTweet, editTweet, removeTweet, toggleLike } from "@/domains/tweets/service";
+import type { RootState } from "@/app/store";
 import type {
+  FeedSort,
   TweetsState,
   CreateTweetPayload,
   UpdateTweetPayload,
@@ -13,13 +15,15 @@ const initialState: TweetsState = {
   isCreating: false,
   error: null,
   hasFetched: false,
+  sort: "recent",
 };
 
 export const fetchTweets = createAsyncThunk(
   "tweets/fetchAll",
-  async (cursor: string | undefined, { rejectWithValue }) => {
+  async (cursor: string | undefined, { rejectWithValue, getState }) => {
     try {
-      return await getTweets(cursor);
+      const sort = (getState() as RootState).tweets.sort;
+      return await getTweets(cursor, 20, sort);
     } catch (err) {
       return rejectWithValue((err as Error).message);
     }
@@ -48,6 +52,20 @@ export const updateTweet = createAsyncThunk(
   }
 );
 
+export const likeTweet = createAsyncThunk(
+  "tweets/like",
+  async (id: string, { rejectWithValue, getState }) => {
+    try {
+      const userId = (getState() as RootState).auth.user?.id;
+      if (!userId) return rejectWithValue("Not authenticated");
+      const result = await toggleLike(id);
+      return { ...result, userId };
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
+    }
+  }
+);
+
 export const deleteTweet = createAsyncThunk(
   "tweets/delete",
   async (id: string, { rejectWithValue }) => {
@@ -62,11 +80,19 @@ export const deleteTweet = createAsyncThunk(
 const tweetsSlice = createSlice({
   name: "tweets",
   initialState,
-  reducers: {},
+  reducers: {
+    setSort: (state, action: { payload: FeedSort }) => {
+      state.sort = action.payload;
+      // Reset feed when switching tabs so the new sort fetches fresh data
+      state.items = [];
+      state.nextCursor = null;
+      state.hasFetched = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTweets.pending, (state) => {
-        // Only show loading indicator on the initial fetch (no existing items)
+        // Only show loading indicator on the initial fetch
         if (state.items.length === 0) {
           state.isLoading = true;
         }
@@ -99,7 +125,10 @@ const tweetsSlice = createSlice({
       })
       .addCase(createTweet.fulfilled, (state, action) => {
         state.isCreating = false;
-        state.items = [action.payload, ...(state.items ?? [])];
+        // Only prepend in recent mode — trending order would be wrong otherwise
+        if (state.sort === "recent") {
+          state.items = [action.payload, ...(state.items ?? [])];
+        }
       })
       .addCase(createTweet.rejected, (state, action) => {
         state.isCreating = false;
@@ -117,8 +146,21 @@ const tweetsSlice = createSlice({
       })
       .addCase(deleteTweet.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(likeTweet.fulfilled, (state, action) => {
+        const { tweetId, liked, likesCount } = action.payload;
+        const tweet = state.items.find((t) => t.id === tweetId);
+        if (!tweet) return;
+        tweet._count.likes = likesCount;
+        const userId = action.payload.userId;
+        if (liked) {
+          tweet.likes.push({ userId });
+        } else {
+          tweet.likes = tweet.likes.filter((l) => l.userId !== userId);
+        }
       });
   },
 });
 
+export const { setSort } = tweetsSlice.actions;
 export default tweetsSlice.reducer;

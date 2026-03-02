@@ -4,7 +4,7 @@ import { Heart, Trash2, Pencil, X, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { deleteTweet, updateTweet } from "@/domains/tweets/slice";
+import { deleteTweet, updateTweet, likeTweet } from "@/domains/tweets/slice";
 import type { Tweet } from "@/domains/tweets/types";
 import type { AppDispatch, RootState } from "@/app/store";
 import { timeAgo } from "@/utils/timeAgo";
@@ -56,6 +56,7 @@ export function TweetCard({ tweet }: TweetCardProps) {
   const dispatch = useDispatch<AppDispatch>();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const isOwner = currentUser?.id === tweet.authorId;
+  const isLiked = tweet.likes.some((l) => l.userId === currentUser?.id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(tweet.content);
@@ -247,10 +248,21 @@ export function TweetCard({ tweet }: TweetCardProps) {
             <div className="flex items-center gap-1 mt-2 -ml-1.5">
               <motion.button
                 whileTap={{ scale: 0.85 }}
-                className="flex items-center gap-1.5 px-1.5 py-1 rounded-full text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors group"
-                aria-label="Liker"
+                onClick={() => dispatch(likeTweet(tweet.id))}
+                className={cn(
+                  "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
+                  isLiked
+                    ? "text-red-400"
+                    : "text-muted-foreground hover:text-red-400 hover:bg-red-400/10",
+                )}
+                aria-label={isLiked ? "Ne plus liker" : "Liker"}
               >
-                <Heart className="size-4 group-hover:scale-110 transition-transform" />
+                <Heart
+                  className={cn(
+                    "size-4 transition-transform group-hover:scale-110",
+                    isLiked && "fill-current",
+                  )}
+                />
                 <span className="text-xs">{tweet._count.likes}</span>
               </motion.button>
             </div>
