@@ -1,9 +1,10 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Home, User, Feather } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FluxeLogo } from "@/components/FluxeLogo";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { RootState } from "@/app/store";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
@@ -15,6 +16,7 @@ interface DesktopSidebarProps {
 export function DesktopSidebar({ onCompose }: DesktopSidebarProps) {
   const { user } = useSelector((state: RootState) => state.auth);
   const width = useWindowWidth();
+  const navigate = useNavigate();
 
   const mode: "full" | "compact" | "hidden" =
     width >= 1024 ? "full" : width >= 768 ? "compact" : "hidden";
@@ -82,7 +84,7 @@ export function DesktopSidebar({ onCompose }: DesktopSidebarProps) {
         </NavLink>
 
         <NavLink
-          to="/profile"
+          to={user ? `/profile/${user.id}` : "/home"}
           className={({ isActive }) =>
             cn(
               "flex items-center rounded-lg transition-colors",
@@ -116,10 +118,7 @@ export function DesktopSidebar({ onCompose }: DesktopSidebarProps) {
       {/* Bottom */}
       <div className={cn("pb-5 flex flex-col gap-3", isFull ? "px-4" : "px-2 items-center")}>
         {isFull ? (
-          <Button
-            onClick={onCompose}
-            className="rounded-lg w-full font-semibold h-10"
-          >
+          <Button onClick={onCompose} className="rounded-lg w-full font-semibold h-10">
             Poster
           </Button>
         ) : (
@@ -133,13 +132,21 @@ export function DesktopSidebar({ onCompose }: DesktopSidebarProps) {
           </motion.button>
         )}
 
-        <div className={cn(
-          "flex items-center rounded-lg hover:bg-accent/60 transition-colors cursor-pointer",
-          isFull ? "gap-3 px-3 py-2.5" : "justify-center p-1.5"
-        )}>
-          <div className="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-            <User className="size-4 text-muted-foreground" />
-          </div>
+        {/* User card → cliquable vers le profil */}
+        <button
+          onClick={() => user && navigate(`/profile/${user.id}`)}
+          className={cn(
+            "flex items-center rounded-lg hover:bg-accent/60 transition-colors w-full text-left",
+            isFull ? "gap-3 px-3 py-2" : "justify-center p-1.5"
+          )}
+        >
+          <Avatar className="size-8 shrink-0">
+            <AvatarImage src={user?.avatar ?? undefined} alt={user?.username} />
+            <AvatarFallback className="bg-sky-500/15 text-sky-500 font-bold text-xs">
+              {user?.username?.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
           <AnimatePresence>
             {isFull && user && (
               <motion.div
@@ -148,12 +155,12 @@ export function DesktopSidebar({ onCompose }: DesktopSidebarProps) {
                 exit={{ opacity: 0, width: 0 }}
                 className="flex flex-col min-w-0 overflow-hidden"
               >
-                <span className="text-sm font-semibold truncate">{user.username}</span>
+                <span className="text-sm font-semibold truncate leading-tight">{user.username}</span>
                 <span className="text-xs text-muted-foreground truncate">@{user.username}</span>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </button>
       </div>
     </motion.aside>
   );

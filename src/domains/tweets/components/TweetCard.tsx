@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, Trash2, Pencil, X, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,36 +26,20 @@ interface TweetCardProps {
   tweet: Tweet;
 }
 
-function Avatar({
-  username,
-  avatar,
-}: {
-  username: string;
-  avatar: string | null;
-}) {
-  const [imgError, setImgError] = useState(false);
-
-  if (avatar && !imgError) {
-    return (
-      <img
-        src={avatar}
-        alt={username}
-        className="size-10 rounded-full object-cover ring-2 ring-border"
-        onError={() => setImgError(true)}
-      />
-    );
-  }
+function TweetAvatar({ username, avatar }: { username: string; avatar: string | null }) {
   return (
-    <div className="size-10 rounded-full bg-sky-500/15 ring-2 ring-border flex items-center justify-center shrink-0">
-      <span className="text-sky-400 font-bold text-sm uppercase select-none">
-        {username.slice(0, 2)}
-      </span>
-    </div>
+    <Avatar className="size-10 ring-2 ring-border">
+      <AvatarImage src={avatar ?? undefined} alt={username} />
+      <AvatarFallback className="bg-sky-500/15 text-sky-500 font-bold text-sm">
+        {username.slice(0, 2).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
   );
 }
 
 export function TweetCard({ tweet }: TweetCardProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const isOwner = currentUser?.id === tweet.authorId;
   const isLiked = tweet.likes.some((l) => l.userId === currentUser?.id);
@@ -104,15 +90,23 @@ export function TweetCard({ tweet }: TweetCardProps) {
       className="px-4 py-3 border-b border-border hover:bg-accent/20 transition-colors"
     >
       <div className="flex gap-3">
-        <Avatar username={tweet.author.username} avatar={tweet.author.avatar} />
+        <button
+          onClick={() => navigate(`/profile/${tweet.author.id}`)}
+          className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+        >
+          <TweetAvatar username={tweet.author.username} avatar={tweet.author.avatar} />
+        </button>
 
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-              <span className="font-bold text-[15px] text-foreground truncate">
+              <button
+                onClick={() => navigate(`/profile/${tweet.author.id}`)}
+                className="font-bold text-[15px] text-foreground truncate hover:underline"
+              >
                 {tweet.author.username}
-              </span>
+              </button>
               <span className="text-muted-foreground text-sm truncate">
                 @{tweet.author.username}
               </span>
@@ -248,7 +242,11 @@ export function TweetCard({ tweet }: TweetCardProps) {
             <div className="flex items-center gap-1 mt-2 -ml-1.5">
               <motion.button
                 whileTap={{ scale: 0.85 }}
-                onClick={() => dispatch(likeTweet(tweet.id))}
+                onClick={() =>
+                  dispatch(likeTweet(tweet.id)).catch(() =>
+                    toast.error("Erreur lors du like")
+                  )
+                }
                 className={cn(
                   "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
                   isLiked

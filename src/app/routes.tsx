@@ -6,6 +6,7 @@ import { fetchMe } from "@/domains/auth/slice";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
+import Profile from "@/pages/Profile";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { accessToken } = useSelector((state: RootState) => state.auth);
@@ -23,7 +24,6 @@ export default function AppRoutes() {
   const didFetchMe = useRef(false);
 
   useEffect(() => {
-    // Ne fetch qu'une seule fois au mount, pas à chaque changement de token
     if (accessToken && !didFetchMe.current) {
       didFetchMe.current = true;
       dispatch(fetchMe());
@@ -38,6 +38,7 @@ export default function AppRoutes() {
       <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       <Route path="/register" element={<GuestRoute><Signup /></GuestRoute>} />
       <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
