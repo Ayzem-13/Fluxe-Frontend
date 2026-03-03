@@ -26,7 +26,6 @@ export function TweetFeed() {
     if (error) toast.error(error);
   }, [error]);
 
-  // Initial fetch + polling + visibility-based refresh
   useEffect(() => {
     function doFetch() {
       const now = Date.now();
@@ -50,7 +49,6 @@ export function TweetFeed() {
     };
   }, [dispatch]);
 
-  // Infinite scroll via IntersectionObserver on sentinel element
   const loadMore = useCallback(() => {
     if (nextCursor && !isLoading) {
       dispatch(fetchTweets(nextCursor));

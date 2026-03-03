@@ -158,6 +158,9 @@ const tweetsSlice = createSlice({
         } else {
           tweet.likes = tweet.likes.filter((l) => l.userId !== userId);
         }
+      })
+      .addCase(likeTweet.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });
