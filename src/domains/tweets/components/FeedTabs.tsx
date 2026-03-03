@@ -7,7 +7,7 @@ import type { FeedSort } from "@/domains/tweets/types";
 const TABS: { label: string; value: FeedSort; disabled?: boolean }[] = [
   { label: "Récents", value: "recent" },
   { label: "Tendances", value: "trending" },
-  { label: "Abonnements", value: "following", disabled: true },
+  { label: "Abonnements", value: "following" },
 ];
 
 export function FeedTabs() {
