@@ -8,6 +8,7 @@ import {
   fetchUserProfile,
   fetchUserTweets,
   clearProfile,
+  toggleFollow,
 } from "@/domains/users/slice";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 import { AvatarCropDialog } from "@/components/ui/AvatarCropDialog";
@@ -35,7 +36,7 @@ export default function Profile() {
   const dispatch = useDispatch<AppDispatch>();
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const { profile, tweets, isLoading, error } = useSelector(
+  const { profile, tweets, isLoading, error, isFollowLoading } = useSelector(
     (state: RootState) => state.userProfile,
   );
 
@@ -184,6 +185,26 @@ export default function Profile() {
                   </Button>
                 </motion.div>
               )}
+              {!isLoading && profile && !isOwnProfile && (
+                <motion.div
+                  key="follow"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <Button
+                    disabled={isFollowLoading}
+                    variant={profile.isFollowing ? "default" : "outline"}
+                    onClick={() => dispatch(toggleFollow(id ?? ""))}
+                    className="rounded-full font-bold h-9 px-6 text-sm"
+                  >
+                    {isFollowLoading
+                      ? "..."
+                      : profile.isFollowing
+                        ? "Ne plus suivre"
+                        : "Suivre"}
+                  </Button>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </div>
@@ -209,12 +230,14 @@ export default function Profile() {
             </div>
 
             <div className="flex gap-4 text-sm pt-1">
-              <span>
-                <span className="font-bold text-foreground">
-                  {profile._count.following}
-                </span>{" "}
-                <span className="text-muted-foreground">abonnements</span>
-              </span>
+              {isOwnProfile && (
+                <span>
+                  <span className="font-bold text-foreground">
+                    {profile._count.following}
+                  </span>{" "}
+                  <span className="text-muted-foreground">abonnements</span>
+                </span>
+              )}
               <span>
                 <span className="font-bold text-foreground">
                   {profile._count.followers}
