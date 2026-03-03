@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const MAX = 280;
 const MAX_HEIGHT = 200;
@@ -39,7 +40,6 @@ export function TweetComposer({
   const progress = Math.min(content.length / MAX, 1);
   const dashOffset = circumference * (1 - progress);
 
-  // Auto-resize textarea
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -86,11 +86,12 @@ export function TweetComposer({
     >
       <div className="flex gap-4 flex-1">
         {/* Avatar */}
-        <div className="size-10 rounded-full bg-sky-500/15 ring-2 ring-border flex items-center justify-center shrink-0 mt-0.5">
-          <span className="text-sky-400 font-bold text-sm uppercase select-none">
-            {user?.username?.slice(0, 2) ?? "?"}
-          </span>
-        </div>
+        <Avatar className="size-10 ring-2 ring-border shrink-0 mt-0.5">
+          <AvatarImage src={user?.avatar ?? undefined} alt={user?.username} />
+          <AvatarFallback className="bg-sky-500/15 text-sky-500 font-bold text-sm">
+            {user?.username?.slice(0, 2).toUpperCase() ?? "?"}
+          </AvatarFallback>
+        </Avatar>
 
         <div className="flex-1 flex flex-col min-w-0">
           <textarea
