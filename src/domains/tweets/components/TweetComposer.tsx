@@ -82,7 +82,7 @@ export function TweetComposer({
 
   return (
     <div
-      className={cn("px-4 pt-4 pb-3 flex flex-col", isModal && "flex-1 h-full")}
+      className={cn("pt-4 pb-3 flex flex-col", isModal ? "flex-1 h-full px-4" : "px-4")}
     >
       <div className="flex gap-4 flex-1">
         {/* Avatar */}

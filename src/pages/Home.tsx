@@ -6,12 +6,14 @@ import { FeedTabs } from "@/domains/tweets/components/FeedTabs";
 export default function Home() {
   return (
     <AppLayout>
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
         <FeedTabs />
       </div>
 
       <div className="hidden md:block border-b border-border">
-        <TweetComposer />
+        <div className="px-4">
+          <TweetComposer />
+        </div>
       </div>
       <TweetFeed />
     </AppLayout>
