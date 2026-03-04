@@ -7,6 +7,7 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
 import Profile from "@/pages/Profile";
+import Notifications from "@/pages/Notifications";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { accessToken } = useSelector((state: RootState) => state.auth);
@@ -39,6 +40,7 @@ export default function AppRoutes() {
       <Route path="/register" element={<GuestRoute><Signup /></GuestRoute>} />
       <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
       <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
