@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { UserProfileState, FollowResponse } from "./types";
-import type { FetchTweetsResponse } from "@/domains/tweets/types";
-import { usersApi } from "./api";
+import type { UserProfileState } from "./types";
+import { getUserProfile, getUserTweets, toggleUserFollow } from "./service";
 import { likeTweet } from "@/domains/tweets/slice";
 
 const initialState: UserProfileState = {
@@ -17,12 +16,9 @@ export const fetchUserProfile = createAsyncThunk(
   "userProfile/fetchProfile",
   async (userId: string, { rejectWithValue }) => {
     try {
-      const res = await usersApi.getProfile(userId);
-      return res.data;
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: string } } })
-        ?.response?.data?.error ?? "Erreur lors du chargement du profil";
-      return rejectWithValue(msg);
+      return await getUserProfile(userId);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
     }
   }
 );
@@ -31,12 +27,9 @@ export const fetchUserTweets = createAsyncThunk(
   "userProfile/fetchTweets",
   async ({ userId, cursor }: { userId: string; cursor?: string }, { rejectWithValue }) => {
     try {
-      const res = await usersApi.getTweets(userId, cursor);
-      return res.data as FetchTweetsResponse;
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: string } } })
-        ?.response?.data?.error ?? "Erreur lors du chargement des tweets";
-      return rejectWithValue(msg);
+      return await getUserTweets(userId, cursor);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
     }
   }
 );
@@ -45,12 +38,9 @@ export const toggleFollow = createAsyncThunk(
   "userProfile/toggleFollow",
   async (userId: string, { rejectWithValue }) => {
     try {
-      const res = await usersApi.toggleFollow(userId);
-      return res.data as FollowResponse;
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: string } } })
-        ?.response?.data?.error ?? "Erreur";
-      return rejectWithValue(msg);
+      return await toggleUserFollow(userId);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
     }
   }
 );
