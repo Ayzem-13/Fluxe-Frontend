@@ -89,6 +89,9 @@ export function AuthPage({ mode, fields, onSubmit, isLoading, linkTo, linkLabel,
                   transition={{ delay: i * 0.05 }}
                 >
                   <Label htmlFor={field.id}>{field.label}</Label>
+                  {field.description && (
+                    <p className="text-xs text-muted-foreground -mt-1">{field.description}</p>
+                  )}
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {field.icon}
@@ -101,6 +104,7 @@ export function AuthPage({ mode, fields, onSubmit, isLoading, linkTo, linkLabel,
                       onChange={field.onChange}
                       minLength={field.minLength}
                       required={field.required}
+                      autoComplete={field.autoComplete || "off"}
                       className="pl-9 pr-9"
                     />
                     {isPassword && (

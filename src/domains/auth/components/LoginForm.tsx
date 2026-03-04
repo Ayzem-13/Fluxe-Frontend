@@ -52,6 +52,7 @@ export default function LoginForm() {
           value: email,
           onChange: (e) => setEmail(e.target.value),
           required: true,
+          autoComplete: "email",
         },
         {
           id: "password",
@@ -62,6 +63,7 @@ export default function LoginForm() {
           value: password,
           onChange: (e) => setPassword(e.target.value),
           required: true,
+          autoComplete: "current-password",
         },
       ]}
     />

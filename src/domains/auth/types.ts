@@ -37,6 +37,8 @@ export interface AuthField {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   minLength?: number;
   required?: boolean;
+  description?: string;
+  autoComplete?: string;
 }
 
 export interface AuthPageProps {

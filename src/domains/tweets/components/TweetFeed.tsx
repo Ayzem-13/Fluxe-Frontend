@@ -6,6 +6,7 @@ import { fetchTweets } from "@/domains/tweets/slice";
 import { TweetCard } from "@/domains/tweets/components/TweetCard";
 import { TweetFeedSkeleton } from "@/domains/tweets/components/TweetSkeleton";
 import type { AppDispatch, RootState } from "@/app/store";
+import { Pencil } from "lucide-react";
 
 const POLL_INTERVAL = 30_000;
 const DEBOUNCE_MS = 5_000;
@@ -74,11 +75,18 @@ export function TweetFeed() {
 
   if (!isLoading && items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
-        <p className="text-lg font-semibold text-foreground">
-          Aucun tweet pour l'instant
-        </p>
-        <p className="text-sm">Soyez le premier à poster !</p>
+      <div className="flex flex-col items-center justify-center py-32 px-4 gap-4">
+        <div className="size-20 rounded-full bg-muted/50 flex items-center justify-center mb-2">
+          <Pencil className="size-10 text-muted-foreground/40" />
+        </div>
+        <div className="text-center space-y-2 max-w-70">
+          <p className="font-bold text-xl text-foreground">
+            Aucun tweet pour l'instant
+          </p>
+          <p className="text-[15px] text-muted-foreground leading-snug">
+            Soyez le premier à partager vos pensées avec le monde !
+          </p>
+        </div>
       </div>
     );
   }

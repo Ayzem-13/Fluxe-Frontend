@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -68,6 +69,9 @@ export function AvatarCropDialog({ imageSrc, open, onClose, onConfirm }: AvatarC
           <DialogTitle className="text-base font-semibold">
             Modifier l'image
           </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Recadrez et zoomez votre avatar
+          </DialogDescription>
         </DialogHeader>
 
         {/* Zone de crop pleine largeur */}

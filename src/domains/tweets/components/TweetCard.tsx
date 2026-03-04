@@ -215,9 +215,19 @@ export function TweetCard({ tweet }: TweetCardProps) {
                           !editContent.trim() || remaining < 0 || isSaving
                         }
                         className="p-1.5 rounded-full text-sky-400 hover:bg-sky-400/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        aria-label="Enregistrer"
+                        aria-label={isSaving ? "Enregistrement en cours" : "Enregistrer"}
                       >
-                        <Check className="size-4.5" />
+                        {isSaving ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="inline-block"
+                          >
+                            <Check className="size-4.5" />
+                          </motion.div>
+                        ) : (
+                          <Check className="size-4.5" />
+                        )}
                       </motion.button>
                     </div>
                   </div>

@@ -4,7 +4,9 @@ import {
   DialogContent,
   DialogTitle,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { TweetComposer } from "@/domains/tweets/components/TweetComposer";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 
@@ -36,7 +38,10 @@ export function ComposerModal({ open, onClose }: ComposerModalProps) {
           }
         `}
       >
-        <DialogTitle className="sr-only">Nouveau tweet</DialogTitle>
+        <VisuallyHidden>
+          <DialogTitle>Nouveau tweet</DialogTitle>
+          <DialogDescription>Composez et publiez un nouveau tweet</DialogDescription>
+        </VisuallyHidden>
 
         {/* Header */}
         <div className="flex items-center px-4 h-14 border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-10 shrink-0">

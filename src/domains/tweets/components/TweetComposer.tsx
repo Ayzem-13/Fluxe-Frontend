@@ -82,8 +82,7 @@ export function TweetComposer({
 
   return (
     <div
-      className={cn("pt-4 pb-3 flex flex-col", isModal ? "flex-1 h-full px-4" : "px-4")}
-    >
+      className={cn("pt-4 pb-3 flex flex-col", isModal ? "flex-1 h-full px-4" : "px-4",)}>
       <div className="flex gap-4 flex-1">
         {/* Avatar */}
         <Avatar className="size-10 ring-2 ring-border shrink-0 mt-0.5">
@@ -105,9 +104,7 @@ export function TweetComposer({
             autoFocus={autoFocus}
             className={cn(
               "resize-none border-none shadow-none bg-transparent placeholder:text-muted-foreground/60 focus:outline-none w-full leading-relaxed mb-4",
-              isModal
-                ? "text-xl sm:text-lg min-h-35"
-                : "text-lg min-h-11",
+              isModal ? "text-xl sm:text-lg min-h-35" : "text-lg min-h-11",
             )}
             style={{ overflowY: "hidden" }}
           />
@@ -180,23 +177,30 @@ export function TweetComposer({
               )}
             </AnimatePresence>
 
-            <Button
-              onClick={handleSubmit}
-              disabled={isEmpty || isOverLimit || isCreating}
-              className={cn(
-                "rounded-full font-bold shadow-sm transition-all duration-200",
-                isModal ? "px-6 h-10 text-[15px]" : "px-5 h-9 text-sm",
-              )}
-            >
-              {isCreating ? (
-                <span className="flex items-center gap-2">
-                  <span className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  Publication…
+            <div className="flex items-center gap-3">
+              {!isModal && (
+                <span className="hidden sm:inline-block text-[11px] font-medium text-muted-foreground/50">
+                  Ctrl + Entrée pour envoyer
                 </span>
-              ) : (
-                "Poster"
               )}
-            </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={isEmpty || isOverLimit || isCreating}
+                className={cn(
+                  "rounded-full font-bold shadow-sm transition-all duration-200",
+                  isModal ? "px-6 h-10 text-[15px]" : "px-5 h-9 text-sm",
+                )}
+              >
+                {isCreating ? (
+                  <span className="flex items-center gap-2">
+                    <span className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Publication…
+                  </span>
+                ) : (
+                  "Poster"
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

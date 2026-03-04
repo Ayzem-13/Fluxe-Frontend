@@ -17,7 +17,7 @@ export function MobileNav() {
         className={({ isActive }) =>
           cn(
             "flex items-center justify-center px-6 py-1 rounded-xl transition-colors",
-            isActive ? "text-foreground" : "text-muted-foreground"
+            isActive ? "text-foreground" : "text-muted-foreground",
           )
         }
       >
@@ -32,7 +32,7 @@ export function MobileNav() {
         className={({ isActive }) =>
           cn(
             "flex items-center justify-center px-6 py-1 rounded-xl transition-colors",
-            isActive ? "text-foreground" : "text-muted-foreground"
+            isActive ? "text-foreground" : "text-muted-foreground",
           )
         }
       >
@@ -47,17 +47,21 @@ export function MobileNav() {
         className={({ isActive }) =>
           cn(
             "flex items-center justify-center px-6 py-1 rounded-xl transition-colors relative",
-            isActive ? "text-foreground" : "text-muted-foreground"
+            isActive ? "text-foreground" : "text-muted-foreground",
           )
         }
       >
         {({ isActive }) => (
-          <>
+          <div className="relative flex items-center justify-center">
             <Bell className="size-6" strokeWidth={isActive ? 2.5 : 1.75} />
             {unreadCount > 0 && (
-              <div className="absolute -top-1 -right-1 size-2 bg-sky-500 rounded-full" />
+              <div className="absolute -top-1.5 -right-1.5 bg-sky-500 rounded-full size-4.5 flex items-center justify-center border-2 border-background">
+                <span className="text-white text-[10px] font-bold leading-none">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              </div>
             )}
-          </>
+          </div>
         )}
       </NavLink>
     </nav>

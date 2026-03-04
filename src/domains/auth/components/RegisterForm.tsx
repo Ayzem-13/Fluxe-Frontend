@@ -63,6 +63,7 @@ export default function RegisterForm() {
           value: email,
           onChange: (e) => setEmail(e.target.value),
           required: true,
+          autoComplete: "email",
         },
         {
           id: "username",
@@ -73,6 +74,7 @@ export default function RegisterForm() {
           value: username,
           onChange: (e) => setUsername(e.target.value),
           required: true,
+          description: "3-20 caractères, lettres et chiffres",
         },
         {
           id: "password",
@@ -84,6 +86,8 @@ export default function RegisterForm() {
           onChange: (e) => setPassword(e.target.value),
           required: true,
           minLength: 6,
+          description: "Au moins 6 caractères",
+          autoComplete: "new-password",
         },
         {
           id: "confirmPassword",
@@ -94,6 +98,7 @@ export default function RegisterForm() {
           value: confirmPassword,
           onChange: (e) => setConfirmPassword(e.target.value),
           required: true,
+          autoComplete: "new-password",
         },
       ]}
     />

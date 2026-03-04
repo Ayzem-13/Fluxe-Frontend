@@ -25,7 +25,7 @@ export function FeedTabs() {
     <Tabs value={sort} onValueChange={handleChange} className="w-full">
       <TabsList
         variant="line"
-        className="w-full h-13.25 rounded-none border-b border-border bg-transparent p-0"
+        className="w-full h-13.25 rounded-none bg-transparent p-0"
       >
         {TABS.map((tab) => (
           <TabsTrigger
