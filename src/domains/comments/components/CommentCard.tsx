@@ -11,6 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { timeAgo } from "@/utils/timeAgo";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { DeleteConfirmDialog } from "@/components/ui/DeleteConfirmDialog";
 
 interface CommentCardProps {
   comment: Comment;
@@ -108,14 +109,20 @@ export function CommentCard({ comment, tweetId }: CommentCardProps) {
                 >
                   <Pencil className="size-3.5" />
                 </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleDelete}
-                  className="p-1.5 rounded-full text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
-                  aria-label="Supprimer"
-                >
-                  <Trash2 className="size-3.5" />
-                </motion.button>
+                <DeleteConfirmDialog
+                  trigger={
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      className="p-1.5 rounded-full text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                      aria-label="Supprimer"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </motion.button>
+                  }
+                  title="Supprimer le commentaire ?"
+                  description="Il n'est pas possible d'annuler cette opération. Ce commentaire sera définitivement supprimé."
+                  onConfirm={handleDelete}
+                />
               </div>
             )}
           </div>
