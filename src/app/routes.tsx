@@ -8,6 +8,7 @@ import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
 import Profile from "@/pages/Profile";
 import Notifications from "@/pages/Notifications";
+import TweetDetail from "@/pages/TweetDetail";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { accessToken } = useSelector((state: RootState) => state.auth);
@@ -36,11 +37,54 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-      <Route path="/register" element={<GuestRoute><Signup /></GuestRoute>} />
-      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+      <Route
+        path="/login"
+        element={
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <GuestRoute>
+            <Signup />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/:id"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tweet/:id"
+        element={
+          <ProtectedRoute>
+            <TweetDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
