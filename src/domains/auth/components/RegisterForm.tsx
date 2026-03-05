@@ -24,8 +24,12 @@ export default function RegisterForm() {
       toast.error("L'email est requis");
       return;
     }
-    if (!username) {
+    if (!username.trim()) {
       toast.error("Le nom d'utilisateur est requis");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
+      toast.error("Le nom d'utilisateur ne peut contenir que des lettres, chiffres et _");
       return;
     }
     if (password.length < 6) {
@@ -37,7 +41,7 @@ export default function RegisterForm() {
       return;
     }
 
-    const result = await dispatch(register({ email, username, password }));
+    const result = await dispatch(register({ email, username: username.trim(), password }));
     if (register.fulfilled.match(result)) {
       navigate("/login");
     } else {

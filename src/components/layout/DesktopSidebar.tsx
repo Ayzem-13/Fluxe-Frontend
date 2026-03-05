@@ -256,7 +256,7 @@ export function DesktopSidebar({ onCompose }: DesktopSidebarProps) {
               </AnimatePresence>
 
               {isFull && (
-                <MoreHorizontal className="size-4 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <MoreHorizontal className="size-4 text-muted-foreground shrink-0 transition-opacity" />
               )}
             </button>
           </DropdownMenuTrigger>
