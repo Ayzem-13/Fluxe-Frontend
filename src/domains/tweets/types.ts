@@ -13,7 +13,7 @@ export interface Tweet {
   author: TweetAuthor;
   likes: { userId: string }[];
   retweets: { authorId: string }[];
-  _count: { likes: number; retweets: number };
+  _count: { likes: number; retweets: number; comments: number };
   retweetOfId: string | null;
   retweetOf: {
     id: string;
@@ -23,7 +23,7 @@ export interface Tweet {
     author: TweetAuthor;
     likes: { userId: string }[];
     retweets: { authorId: string }[];
-    _count: { likes: number; retweets: number };
+    _count: { likes: number; retweets: number; comments: number };
   } | null;
 }
 

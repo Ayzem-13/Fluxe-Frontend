@@ -7,6 +7,9 @@ export const tweetsApi = {
       params: { limit, sort, ...(cursor ? { cursor } : {}) },
     }),
 
+  getById: (id: string) =>
+    axiosInstance.get(`/tweets/${id}`),
+
   create: (data: CreateTweetPayload) =>
     axiosInstance.post("/tweets", data),
 

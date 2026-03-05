@@ -2,17 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, Trash2, Pencil, X, Check, Repeat2 } from "lucide-react";
+import { Heart, Trash2, Pencil, X, Check, Repeat2, MessageCircle, } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { deleteTweet, updateTweet, likeTweet, retweet, } from "@/domains/tweets/slice";
+import { deleteTweet,updateTweet,likeTweet,retweet,} from "@/domains/tweets/slice";
 import type { Tweet } from "@/domains/tweets/types";
 import type { AppDispatch, RootState } from "@/app/store";
 import { timeAgo } from "@/utils/timeAgo";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
+import { ReplyDialog } from "./ReplyDialog";
 
 interface TweetCardProps {
   tweet: Tweet;
@@ -51,6 +52,17 @@ export function TweetCard({ tweet }: TweetCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(tweet.content);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+
+  const displayAuthor = isRetweet ? tweet.retweetOf!.author : tweet.author;
+  const displayContent = isRetweet ? tweet.retweetOf!.content : tweet.content;
+  const displayDate = isRetweet ? tweet.retweetOf!.createdAt : tweet.createdAt;
+  const displayCounts = isRetweet ? tweet.retweetOf!._count : tweet._count;
+  const actionTweetId = isRetweet ? tweet.retweetOf!.id : tweet.id;
+
+  const remaining = 280 - editContent.length;
+
 
   async function handleDeleteConfirm() {
     const res = await dispatch(deleteTweet(tweet.id));
@@ -83,13 +95,36 @@ export function TweetCard({ tweet }: TweetCardProps) {
     setIsEditing(false);
   }
 
-  const displayAuthor = isRetweet ? tweet.retweetOf!.author : tweet.author;
-  const displayContent = isRetweet ? tweet.retweetOf!.content : tweet.content;
-  const displayDate = isRetweet ? tweet.retweetOf!.createdAt : tweet.createdAt;
-  const displayCounts = isRetweet ? tweet.retweetOf!._count : tweet._count;
-  const actionTweetId = isRetweet ? tweet.retweetOf!.id : tweet.id;
+  function handleRetweet() {
+    if (tweet.retweetOfId) {
+      toast.error("Impossible de retweeter un retweet");
+      return;
+    }
+    if (isOwner) {
+      toast.error("Impossible de retweeter son propre tweet");
+      return;
+    }
+    dispatch(retweet(actionTweetId)).then((res) => {
+      if (retweet.fulfilled.match(res)) {
+        toast.success(res.payload.retweeted ? "Retweeté !" : "Retweet annulé");
+      } else {
+        toast.error((res.payload as string) ?? "Erreur lors du retweet");
+      }
+    });
+  }
 
-  const remaining = 280 - editContent.length;
+  function handleLike() {
+    dispatch(likeTweet(actionTweetId)).catch(() =>
+      toast.error("Erreur lors du like"),
+    );
+  }
+
+  function handleNavigateToDetail(e: React.MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, [role=button], textarea")) return;
+    navigate(`/tweet/${actionTweetId}`);
+  }
+
 
   return (
     <motion.article
@@ -97,7 +132,8 @@ export function TweetCard({ tweet }: TweetCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8, scale: 0.98 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="px-4 py-3 border-b border-border hover:bg-accent/20 transition-colors"
+      className="px-4 py-3 border-b border-border hover:bg-accent/20 transition-colors cursor-pointer"
+      onClick={handleNavigateToDetail}
     >
       {tweet.retweetOfId && (
         <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-muted-foreground">
@@ -275,29 +311,10 @@ export function TweetCard({ tweet }: TweetCardProps) {
           {/* Actions */}
           {!isEditing && (
             <div className="flex items-center gap-1 mt-2 -ml-1.5">
+              {/* Retweet */}
               <motion.button
                 whileTap={{ scale: 0.85 }}
-                onClick={() => {
-                  if (tweet.retweetOfId) {
-                    toast.error("Impossible de retweeter un retweet");
-                    return;
-                  }
-                  if (isOwner) {
-                    toast.error("Impossible de retweeter son propre tweet");
-                    return;
-                  }
-                  dispatch(retweet(actionTweetId)).then((res) => {
-                    if (retweet.fulfilled.match(res)) {
-                      toast.success(
-                        res.payload.retweeted ? "Retweeté !" : "Retweet annulé",
-                      );
-                    } else {
-                      toast.error(
-                        (res.payload as string) ?? "Erreur lors du retweet",
-                      );
-                    }
-                  });
-                }}
+                onClick={handleRetweet}
                 className={cn(
                   "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
                   isRetweeted
@@ -306,21 +323,28 @@ export function TweetCard({ tweet }: TweetCardProps) {
                 )}
                 aria-label={isRetweeted ? "Annuler le retweet" : "Retweeter"}
               >
-                <Repeat2
-                  className={cn(
-                    "size-4 transition-transform group-hover:scale-110",
-                  )}
-                />
+                <Repeat2 className="size-4 transition-transform group-hover:scale-110" />
                 <span className="text-xs">{displayCounts.retweets}</span>
               </motion.button>
 
+              {/* Comment */}
               <motion.button
                 whileTap={{ scale: 0.85 }}
-                onClick={() =>
-                  dispatch(likeTweet(actionTweetId)).catch(() =>
-                    toast.error("Erreur lors du like"),
-                  )
-                }
+                onClick={() => setIsCommentsOpen(true)}
+                className={cn(
+                  "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
+                  "text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10",
+                )}
+                aria-label="Commenter"
+              >
+                <MessageCircle className="size-4 transition-transform group-hover:scale-110" />
+                <span className="text-xs">{displayCounts.comments || 0}</span>
+              </motion.button>
+
+              {/* Like */}
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={handleLike}
                 className={cn(
                   "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
                   isLiked
@@ -341,6 +365,17 @@ export function TweetCard({ tweet }: TweetCardProps) {
           )}
         </div>
       </div>
+
+      <ReplyDialog
+        open={isCommentsOpen}
+        onOpenChange={setIsCommentsOpen}
+        tweetId={actionTweetId}
+        author={displayAuthor}
+        content={displayContent}
+        date={displayDate}
+        isRetweet={isRetweet}
+        retweetAuthor={isRetweet ? tweet.author : undefined}
+      />
     </motion.article>
   );
 }
