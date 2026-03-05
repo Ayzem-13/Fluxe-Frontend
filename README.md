@@ -1,20 +1,17 @@
-# Fluxe — Clone de Twitter
+# Fluxe — Frontend
 
 Application web de micro-blogging développée dans le cadre du projet React (ESIMED).
 
----
-
-## Présentation
-
-Fluxe est un clone de Twitter permettant de gérer des utilisateurs, des tweets, des interactions sociales (follow/unfollow, likes) et des notifications. 
+> **Ce dépôt est le frontend. Il nécessite que le backend soit démarré.**
+> Backend : [Fluxe-Backend](https://github.com/Ayzem-13/Fluxe-Bakcend)
 
 ---
 
 ## Stack technique
 
 | Outil | Rôle |
-|-------|------|
-| React 19 + TypeScript | Framework UI + TypeScript |
+|---|---|
+| React 19 + TypeScript | Framework UI |
 | Vite | Bundler / Dev server |
 | Tailwind CSS v4 | Styles + Dark mode |
 | shadcn/ui | Composants UI |
@@ -26,73 +23,101 @@ Fluxe est un clone de Twitter permettant de gérer des utilisateurs, des tweets,
 
 ---
 
+## Prérequis
+
+- [Bun](https://bun.sh) ≥ 1.2 (ou npm / pnpm)
+- Le [backend Fluxe](https://github.com/Ayzem-13/Fluxe-Bakcend) démarré sur le port `3000`
+
+---
+
 ## Installation
+
+### 1. Cloner le dépôt
 
 ```bash
 git clone https://github.com/Ayzem-13/Fluxe-Frontend.git
 cd Fluxe-Frontend
+```
+
+### 2. Installer les dépendances
+
+Avec Bun :
+```bash
 bun install
+```
+
+Avec Node.js :
+```bash
+npm install
+```
+
+### 3. Configurer les variables d'environnement
+
+```bash
+cp .env.example .env
+```
+
+Le fichier `.env` contient uniquement :
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+### 4. Démarrer le serveur de développement
+
+Avec Bun :
+```bash
 bun run dev
 ```
 
-> Le backend doit tourner sur `http://localhost:3000`
+Avec Node.js :
+```bash
+npm run dev
+```
+
+L'application est disponible sur **http://localhost:5173**
 
 ---
 
 ## Scripts
 
-| Commande | Description |
-|----------|-------------|
-| `bun run dev` | Serveur de développement |
-| `bun run build` | Build de production |
-| `bun run preview` | Prévisualisation du build |
-| `bun run lint` | Analyse ESLint |
+| Commande | Bun | Node.js |
+|---|---|---|
+| Développement | `bun run dev` | `npm run dev` |
+| Build | `bun run build` | `npm run build` |
+| Prévisualisation | `bun run preview` | `npm run preview` |
+| Lint | `bun run lint` | `npm run lint` |
 
 ---
 
-## Fonctionnalités
+## Structure du projet
 
-### 1. Authentification
-- ✅ Inscription et connexion avec base de données
-- ✅ Validation des champs + gestion des erreurs via toasts (email, mot de passe, confirmation)
-- ✅ Option "Rester connecté" — persistance via `localStorage`
-- ✅ Accès restreint aux utilisateurs connectés — redirection automatique vers `/login`
-
-### 2. Fil d'actualité
-- ⏳ Affichage des tweets par ordre chronologique
-- ⏳ Affichage par popularité (tendance — basé sur les likes des 3 derniers jours)
-- ⏳ Affichage des tweets des utilisateurs suivis
-
-### 3. Page Profil
-- ⏳ Affichage des tweets de l'utilisateur par ordre chronologique
-- ⏳ Fonctionnalité Follow / Unfollow
-- ⏳ Affichage uniquement du nombre de followers sur les profils tiers
-
-### 4. CRUD sur les tweets
-- ⏳ Création de tweets
-- ⏳ Lecture des tweets
-- ⏳ Modification de tweets
-- ⏳ Suppression de tweets
-
-### 5. Follow / Followers
-- ⏳ Suivre un utilisateur depuis sa page de profil
-- ⏳ Recevoir un follow d'un autre utilisateur
-
-### 6. Notifications
-- ⏳ Notification lors d'un follow
-- ⏳ Notification lors d'un like sur un tweet
-
-### Bonus
-- ⏳ Retweet (sans retweet d'un retweet)
-- ⏳ Commentaires et likes sur commentaires
-- ⏳ TypeScript strict sur l'ensemble du projet
+```
+src/
+├── app/               # Store Redux + routes
+├── components/
+│   ├── layout/        # Sidebar, MobileNav, ComposerModal
+│   └── ui/            # Composants shadcn/ui
+├── domains/           # Logique métier par domaine (DDD)
+│   ├── auth/          # Authentification (slice, api, types)
+│   ├── tweets/        # Tweets (slice, api, types, components)
+│   ├── comments/      # Commentaires (slice, api, types, components)
+│   ├── users/         # Profils utilisateurs
+│   └── notifications/ # Notifications (slice, api, types, components)
+├── hooks/             # Hooks React personnalisés
+├── pages/             # Pages de l'application
+└── utils/             # Helpers (timeAgo, etc.)
+```
 
 ---
 
-## UX/UI
+## Dépendance avec le backend
 
-- Interface responsive : sidebar desktop + navigation mobile
-- Dark mode automatique basé sur la préférence système
-- Toasts pour les retours utilisateur (succès, erreurs, confirmations)
-- Animations fluides avec Framer Motion
-- Design soigné inspiré de Twitter avec composants shadcn/ui et autres personnalisés
+Ce frontend est conçu pour fonctionner avec [Fluxe-Backend](https://github.com/Ayzem-13/Fluxe-Bakcend).
+
+**Ordre de démarrage :**
+
+1. Démarrer le backend (port `3000`)
+2. Démarrer le frontend (port `5173`)
+
+L'authentification utilise des cookies `httpOnly` pour le refresh token. En développement, le backend autorise toutes les origines CORS.
