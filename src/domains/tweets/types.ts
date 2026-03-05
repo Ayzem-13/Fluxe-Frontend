@@ -12,7 +12,17 @@ export interface Tweet {
   updatedAt: string;
   author: TweetAuthor;
   likes: { userId: string }[];
-  _count: { likes: number };
+  _count: { likes: number; retweets: number };
+  retweetOfId: string | null;
+  retweetOf: {
+    id: string;
+    content: string;
+    authorId: string;
+    createdAt: string;
+    author: TweetAuthor;
+    likes: { userId: string }[];
+    _count: { likes: number; retweets: number };
+  } | null;
 }
 
 export type FeedSort = "recent" | "trending" | "following";

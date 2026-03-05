@@ -2,31 +2,29 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, Trash2, Pencil, X, Check } from "lucide-react";
+import { Heart, Trash2, Pencil, X, Check, Repeat2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { deleteTweet, updateTweet, likeTweet } from "@/domains/tweets/slice";
+import { deleteTweet, updateTweet, likeTweet, retweet, } from "@/domains/tweets/slice";
 import type { Tweet } from "@/domains/tweets/types";
 import type { AppDispatch, RootState } from "@/app/store";
 import { timeAgo } from "@/utils/timeAgo";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
 
 interface TweetCardProps {
   tweet: Tweet;
 }
 
-function TweetAvatar({ username, avatar }: { username: string; avatar: string | null }) {
+function TweetAvatar({
+  username,
+  avatar,
+}: {
+  username: string;
+  avatar: string | null;
+}) {
   return (
     <Avatar className="size-10 ring-2 ring-border">
       <AvatarImage src={avatar ?? undefined} alt={username} />
@@ -42,7 +40,10 @@ export function TweetCard({ tweet }: TweetCardProps) {
   const navigate = useNavigate();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const isOwner = currentUser?.id === tweet.authorId;
-  const isLiked = tweet.likes.some((l) => l.userId === currentUser?.id);
+  const isRetweet = !!tweet.retweetOfId && !!tweet.retweetOf;
+  const isLiked = isRetweet
+    ? tweet.retweetOf!.likes.some((l) => l.userId === currentUser?.id)
+    : tweet.likes.some((l) => l.userId === currentUser?.id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(tweet.content);
@@ -79,6 +80,12 @@ export function TweetCard({ tweet }: TweetCardProps) {
     setIsEditing(false);
   }
 
+  const displayAuthor = isRetweet ? tweet.retweetOf!.author : tweet.author;
+  const displayContent = isRetweet ? tweet.retweetOf!.content : tweet.content;
+  const displayDate = isRetweet ? tweet.retweetOf!.createdAt : tweet.createdAt;
+  const displayCounts = isRetweet ? tweet.retweetOf!._count : tweet._count;
+  const actionTweetId = isRetweet ? tweet.retweetOf!.id : tweet.id;
+
   const remaining = 280 - editContent.length;
 
   return (
@@ -89,12 +96,21 @@ export function TweetCard({ tweet }: TweetCardProps) {
       transition={{ duration: 0.2, ease: "easeOut" }}
       className="px-4 py-3 border-b border-border hover:bg-accent/20 transition-colors"
     >
-      <div className="flex gap-3">
+      {tweet.retweetOfId && (
+        <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-muted-foreground">
+          <Repeat2 className="size-3.5" />
+          <span>{tweet.author.username} a retweeté</span>
+        </div>
+      )}
+      <div className="flex gap-3 px-4 py-3">
         <button
-          onClick={() => navigate(`/profile/${tweet.author.id}`)}
+          onClick={() => navigate(`/profile/${displayAuthor.id}`)}
           className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
         >
-          <TweetAvatar username={tweet.author.username} avatar={tweet.author.avatar} />
+          <TweetAvatar
+            username={displayAuthor.username}
+            avatar={displayAuthor.avatar}
+          />
         </button>
 
         <div className="flex-1 min-w-0">
@@ -102,21 +118,21 @@ export function TweetCard({ tweet }: TweetCardProps) {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
               <button
-                onClick={() => navigate(`/profile/${tweet.author.id}`)}
+                onClick={() => navigate(`/profile/${displayAuthor.id}`)}
                 className="font-bold text-[15px] text-foreground truncate hover:underline"
               >
-                {tweet.author.username}
+                {displayAuthor.username}
               </button>
               <span className="text-muted-foreground text-sm truncate">
-                @{tweet.author.username}
+                @{displayAuthor.username}
               </span>
               <span className="text-muted-foreground text-sm">·</span>
               <span className="text-muted-foreground text-sm shrink-0">
-                {timeAgo(tweet.createdAt)}
+                {timeAgo(displayDate)}
               </span>
             </div>
 
-            {isOwner && !isEditing && (
+            {isOwner && !isEditing && !isRetweet && (
               <div className="flex items-center gap-0.5 shrink-0">
                 <motion.button
                   whileTap={{ scale: 0.9 }}
@@ -215,12 +231,18 @@ export function TweetCard({ tweet }: TweetCardProps) {
                           !editContent.trim() || remaining < 0 || isSaving
                         }
                         className="p-1.5 rounded-full text-sky-400 hover:bg-sky-400/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        aria-label={isSaving ? "Enregistrement en cours" : "Enregistrer"}
+                        aria-label={
+                          isSaving ? "Enregistrement en cours" : "Enregistrer"
+                        }
                       >
                         {isSaving ? (
                           <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            transition={{
+                              duration: 1,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
                             className="inline-block"
                           >
                             <Check className="size-4.5" />
@@ -241,7 +263,7 @@ export function TweetCard({ tweet }: TweetCardProps) {
                   transition={{ duration: 0.15 }}
                   className="mt-1 text-[15px] text-foreground leading-relaxed whitespace-pre-wrap "
                 >
-                  {tweet.content}
+                  {displayContent}
                 </motion.p>
               )}
             </AnimatePresence>
@@ -252,9 +274,42 @@ export function TweetCard({ tweet }: TweetCardProps) {
             <div className="flex items-center gap-1 mt-2 -ml-1.5">
               <motion.button
                 whileTap={{ scale: 0.85 }}
+                onClick={() => {
+                  if (tweet.retweetOfId) {
+                    toast.error("Impossible de retweeter un retweet");
+                    return;
+                  }
+                  if (isOwner) {
+                    toast.error("Impossible de retweeter son propre tweet");
+                    return;
+                  }
+                  dispatch(retweet(actionTweetId)).then((res) => {
+                    if (retweet.fulfilled.match(res)) {
+                      toast.success(
+                        res.payload.retweeted ? "Retweeté !" : "Retweet annulé",
+                      );
+                    } else {
+                      toast.error(
+                        (res.payload as string) ?? "Erreur lors du retweet",
+                      );
+                    }
+                  });
+                }}
+                className={cn(
+                  "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
+                  "text-muted-foreground hover:text-green-400 hover:bg-green-400/10",
+                )}
+                aria-label="Retweeter"
+              >
+                <Repeat2 className="size-4 transition-transform group-hover:scale-110" />
+                <span className="text-xs">{displayCounts.retweets}</span>
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.85 }}
                 onClick={() =>
-                  dispatch(likeTweet(tweet.id)).catch(() =>
-                    toast.error("Erreur lors du like")
+                  dispatch(likeTweet(actionTweetId)).catch(() =>
+                    toast.error("Erreur lors du like"),
                   )
                 }
                 className={cn(
@@ -271,7 +326,7 @@ export function TweetCard({ tweet }: TweetCardProps) {
                     isLiked && "fill-current",
                   )}
                 />
-                <span className="text-xs">{tweet._count.likes}</span>
+                <span className="text-xs">{displayCounts.likes}</span>
               </motion.button>
             </div>
           )}

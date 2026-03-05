@@ -18,4 +18,7 @@ export const tweetsApi = {
 
   like: (id: string) =>
     axiosInstance.post(`/tweets/${id}/like`),
+
+  retweet: (id: string) =>
+    axiosInstance.post(`/tweets/${id}/retweet`),
 };

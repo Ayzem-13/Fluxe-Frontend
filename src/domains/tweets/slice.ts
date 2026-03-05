@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getTweets, postTweet, editTweet, removeTweet, toggleLike } from "@/domains/tweets/service";
+import { getTweets, postTweet, editTweet, removeTweet, toggleLike, retweetTweet } from "@/domains/tweets/service";
 import type { RootState } from "@/app/store";
 import type {
   FeedSort,
@@ -77,6 +77,17 @@ export const deleteTweet = createAsyncThunk(
   }
 );
 
+export const retweet = createAsyncThunk(
+  "tweets/retweet",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      return await retweetTweet(id);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
+    }
+  }
+);
+
 const tweetsSlice = createSlice({
   name: "tweets",
   initialState,
@@ -115,7 +126,6 @@ const tweetsSlice = createSlice({
       })
       .addCase(fetchTweets.rejected, (state, action) => {
         state.isLoading = false;
-        // Suppress polling errors silently when items are already displayed
         if (state.items.length === 0) {
           state.error = action.payload as string;
         }
@@ -125,7 +135,6 @@ const tweetsSlice = createSlice({
       })
       .addCase(createTweet.fulfilled, (state, action) => {
         state.isCreating = false;
-        // Only prepend in recent mode — trending order would be wrong otherwise
         if (state.sort === "recent") {
           state.items = [action.payload, ...(state.items ?? [])];
         }
@@ -160,6 +169,16 @@ const tweetsSlice = createSlice({
         }
       })
       .addCase(likeTweet.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(retweet.fulfilled, (state, action) => {
+        const { tweetId, retweetsCount } = action.payload;
+        const original = state.items.find((t) => t.id === tweetId);
+        if (original) {
+          original._count.retweets = retweetsCount;
+        }
+      })
+      .addCase(retweet.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   },

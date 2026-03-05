@@ -9,10 +9,6 @@ import type {
   LikeResponse,
 } from "./types";
 
-/**
- * Fetches a paginated list of tweets.
- * Normalizes the response: backend may return a raw array or { tweets, nextCursor }.
- */
 export async function getTweets(
   cursor?: string,
   limit = 20,
@@ -48,7 +44,6 @@ export async function editTweet(data: UpdateTweetPayload): Promise<Tweet> {
   }
 }
 
-/** Toggles like on a tweet. Returns the new like state and count. */
 export async function toggleLike(id: string): Promise<LikeResponse & { tweetId: string }> {
   try {
     const res = await tweetsApi.like(id);
@@ -58,12 +53,27 @@ export async function toggleLike(id: string): Promise<LikeResponse & { tweetId: 
   }
 }
 
-/** Deletes a tweet and returns its id so the store can remove it. */
 export async function removeTweet(id: string): Promise<string> {
   try {
     await tweetsApi.remove(id);
     return id;
   } catch (err) {
     throw new Error(extractErrorMessage(err, "Failed to delete tweet"));
+  }
+}
+
+export async function retweetTweet(id: string): Promise<{
+  retweeted: boolean;
+  retweetsCount: number;
+  tweetId: string;
+  tweet?: Tweet;
+  deletedRetweetId?: string;
+}> {
+  try {
+    const res = await tweetsApi.retweet(id);
+    const data = res.data as { retweeted: boolean; retweetsCount: number; tweet?: Tweet; deletedRetweetId?: string };
+    return { ...data, tweetId: id };
+  } catch (err) {
+    throw new Error(extractErrorMessage(err, "Failed to retweet"));
   }
 }
