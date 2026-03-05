@@ -1,15 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, CalendarDays, UserRound, Plus } from "lucide-react";
+import { ArrowLeft, CalendarDays, UserRound, Plus, Repeat2, } from "lucide-react";
 import type { AppDispatch, RootState } from "@/app/store";
-import {
-  fetchUserProfile,
-  fetchUserTweets,
-  clearProfile,
-  toggleFollow,
-} from "@/domains/users/slice";
+import { fetchUserProfile, fetchUserTweets, fetchUserRetweets, clearProfile, toggleFollow, } from "@/domains/users/slice";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 import { AvatarCropDialog } from "@/components/ui/AvatarCropDialog";
 import { TweetCard } from "@/domains/tweets/components/TweetCard";
@@ -36,9 +31,10 @@ export default function Profile() {
   const dispatch = useDispatch<AppDispatch>();
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const { profile, tweets, isLoading, error, isFollowLoading } = useSelector(
-    (state: RootState) => state.userProfile,
-  );
+  const { profile, tweets, retweets, isLoading, error, isFollowLoading } =
+    useSelector((state: RootState) => state.userProfile);
+
+  const [activeTab, setActiveTab] = useState<"posts" | "retweets">("posts");
 
   const isOwnProfile = currentUser?.id === id;
   const {
@@ -84,7 +80,6 @@ export default function Profile() {
 
   return (
     <AppLayout>
-
       {isOwnProfile && (
         <input
           ref={fileInputRef}
@@ -264,50 +259,121 @@ export default function Profile() {
 
       {/* Tab Posts */}
       <div className="border-b border-border">
-        <div className="px-4 h-13.25 flex items-stretch">
-          <div className="relative flex items-center px-1">
-            <span className="font-bold text-[15px]">Posts</span>
-            <div className="absolute bottom-0 inset-x-0 h-0.75 rounded-full bg-sky-500" />
-          </div>
+        <div className="px-4 h-13.25 flex items-stretch gap-6">
+          <button
+            onClick={() => setActiveTab("posts")}
+            className="relative flex items-center px-1 transition-colors"
+          >
+            <span
+              className={`font-bold text-[15px] ${activeTab === "posts" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Posts
+            </span>
+            {activeTab === "posts" && (
+              <div className="absolute bottom-0 inset-x-0 h-0.75 rounded-full bg-sky-500" />
+            )}
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab("retweets");
+              if (id && retweets.length === 0) {
+                dispatch(fetchUserRetweets({ userId: id }));
+              }
+            }}
+            className="relative flex items-center px-1 gap-1.5 transition-colors"
+          >
+            <span
+              className={`font-bold text-[15px] ${activeTab === "retweets" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Retweets
+            </span>
+            {activeTab === "retweets" && (
+              <div className="absolute bottom-0 inset-x-0 h-0.75 rounded-full bg-sky-500" />
+            )}
+          </button>
         </div>
       </div>
 
-      {/* List tweets */}
+      {/* Content based on active tab */}
       <div className="flex flex-col">
-        {isLoading && tweets.length === 0 ? (
-          Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="px-4 py-3 border-b border-border flex gap-3"
-            >
-              <Skeleton className="size-10 rounded-full shrink-0" />
-              <div className="flex-1 space-y-2 pt-1">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
+        {activeTab === "posts" && (
+          <>
+            {isLoading && tweets.length === 0 ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="px-4 py-3 border-b border-border flex gap-3"
+                >
+                  <Skeleton className="size-10 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2 pt-1">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                </div>
+              ))
+            ) : tweets.length === 0 && !isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="size-16 rounded-full bg-muted flex items-center justify-center">
+                  <UserRound className="size-8 text-muted-foreground/40" />
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-lg">Aucun post pour l'instant</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {isOwnProfile
+                      ? "Publiez votre premier tweet !"
+                      : "Cet utilisateur n'a pas encore publié."}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
-        ) : tweets.length === 0 && !isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="size-16 rounded-full bg-muted flex items-center justify-center">
-              <UserRound className="size-8 text-muted-foreground/40" />
-            </div>
-            <div className="text-center">
-              <p className="font-bold text-lg">Aucun post pour l'instant</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {isOwnProfile
-                  ? "Publiez votre premier tweet !"
-                  : "Cet utilisateur n'a pas encore publié."}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <AnimatePresence initial={false}>
-            {tweets.map((tweet) => (
-              <TweetCard key={tweet.id} tweet={tweet} />
-            ))}
-          </AnimatePresence>
+            ) : (
+              <AnimatePresence initial={false}>
+                {tweets.map((tweet) => (
+                  <TweetCard key={tweet.id} tweet={tweet} />
+                ))}
+              </AnimatePresence>
+            )}
+          </>
+        )}
+
+        {activeTab === "retweets" && (
+          <>
+            {isLoading && retweets.length === 0 ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="px-4 py-3 border-b border-border flex gap-3"
+                >
+                  <Skeleton className="size-10 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2 pt-1">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                </div>
+              ))
+            ) : retweets.length === 0 && !isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="size-16 rounded-full bg-muted flex items-center justify-center">
+                  <Repeat2 className="size-8 text-muted-foreground/40" />
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-lg">Aucun retweet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {isOwnProfile
+                      ? "Vos retweets apparaîtront ici."
+                      : "Cet utilisateur n'a retweeté aucun post."}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <AnimatePresence initial={false}>
+                {retweets.map((tweet) => (
+                  <TweetCard key={tweet.id} tweet={tweet} />
+                ))}
+              </AnimatePresence>
+            )}
+          </>
         )}
       </div>
     </AppLayout>
