@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { EditProfileDialog } from "@/domains/users/components/EditProfileDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CalendarDays, UserRound, Plus, Repeat2, } from "lucide-react";
@@ -35,6 +36,7 @@ export default function Profile() {
     useSelector((state: RootState) => state.userProfile);
 
   const [activeTab, setActiveTab] = useState<"posts" | "retweets">("posts");
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const isOwnProfile = currentUser?.id === id;
   const {
@@ -87,6 +89,14 @@ export default function Profile() {
           accept="image/*"
           className="hidden"
           onChange={handleFileChange}
+        />
+      )}
+
+      {isOwnProfile && profile && (
+        <EditProfileDialog
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          profile={profile}
         />
       )}
 
@@ -175,6 +185,7 @@ export default function Profile() {
                   <Button
                     variant="outline"
                     className="rounded-full font-bold h-9 px-4 text-sm"
+                    onClick={() => setIsEditOpen(true)}
                   >
                     Modifier le profil
                   </Button>

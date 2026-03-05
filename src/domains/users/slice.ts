@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { UserProfileState } from "./types";
-import { getUserProfile, getUserTweets, getUserRetweets, toggleUserFollow } from "./service";
+import { getUserProfile, getUserTweets, getUserRetweets, toggleUserFollow, updateUserProfile } from "./service";
 import { likeTweet } from "@/domains/tweets/slice";
 
 const initialState: UserProfileState = {
@@ -52,6 +52,17 @@ export const fetchUserRetweets = createAsyncThunk(
   async ({ userId, cursor }: { userId: string; cursor?: string }, { rejectWithValue }) => {
     try {
       return await getUserRetweets(userId, cursor);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
+    }
+  }
+);
+
+export const updateProfile = createAsyncThunk(
+  "userProfile/updateProfile",
+  async (data: { username?: string; bio?: string; avatar?: string | null }, { rejectWithValue }) => {
+    try {
+      return await updateUserProfile(data);
     } catch (err) {
       return rejectWithValue((err as Error).message);
     }
@@ -139,6 +150,14 @@ const userProfileSlice = createSlice({
       .addCase(fetchUserRetweets.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        if (state.profile) {
+          state.profile.username = action.payload.username;
+          state.profile.avatar = action.payload.avatar;
+          state.profile.bio = action.payload.bio;
+        }
       });
   },
 });

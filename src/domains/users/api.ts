@@ -14,7 +14,7 @@ export const usersApi = {
       params: { limit, ...(cursor ? { cursor } : {}) },
     }),
 
-  updateMe: (data: { bio?: string; avatar?: string }) =>
+  updateMe: (data: { username?: string; bio?: string; avatar?: string | null }) =>
     axiosInstance.put("/users/me", data),
 
   toggleFollow: (id: string) =>

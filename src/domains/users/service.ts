@@ -38,6 +38,19 @@ export async function getUserRetweets(
   }
 }
 
+export async function updateUserProfile(data: {
+  username?: string;
+  bio?: string;
+  avatar?: string | null;
+}): Promise<{ id: string; username: string; avatar: string | null; bio: string | null }> {
+  try {
+    const res = await usersApi.updateMe(data);
+    return res.data as { id: string; username: string; avatar: string | null; bio: string | null };
+  } catch (err) {
+    throw new Error(extractErrorMessage(err, "Erreur lors de la mise à jour du profil"));
+  }
+}
+
 export async function toggleUserFollow(userId: string): Promise<FollowResponse> {
   try {
     const res = await usersApi.toggleFollow(userId);
