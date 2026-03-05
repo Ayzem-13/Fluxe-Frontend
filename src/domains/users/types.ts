@@ -17,7 +17,9 @@ export interface UserProfile {
 export interface UserProfileState {
   profile: UserProfile | null;
   tweets: Tweet[];
+  retweets: Tweet[];
   nextCursor: string | null;
+  retweetsNextCursor: string | null;
   isLoading: boolean;
   isFollowLoading: boolean;
   error: string | null;

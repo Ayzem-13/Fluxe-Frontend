@@ -79,9 +79,12 @@ export const deleteTweet = createAsyncThunk(
 
 export const retweet = createAsyncThunk(
   "tweets/retweet",
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue, getState }) => {
     try {
-      return await retweetTweet(id);
+      const state = getState() as RootState;
+      const userId = state.auth.user?.id ?? "";
+      const result = await retweetTweet(id);
+      return { ...result, userId };
     } catch (err) {
       return rejectWithValue((err as Error).message);
     }
@@ -172,10 +175,15 @@ const tweetsSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(retweet.fulfilled, (state, action) => {
-        const { tweetId, retweetsCount } = action.payload;
+        const { tweetId, retweeted, retweetsCount, userId } = action.payload;
         const original = state.items.find((t) => t.id === tweetId);
         if (original) {
           original._count.retweets = retweetsCount;
+          if (retweeted) {
+            original.retweets = [...(original.retweets ?? []), { authorId: userId }];
+          } else {
+            original.retweets = (original.retweets ?? []).filter((r) => r.authorId !== userId);
+          }
         }
       })
       .addCase(retweet.rejected, (state, action) => {

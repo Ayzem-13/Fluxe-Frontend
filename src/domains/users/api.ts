@@ -9,6 +9,11 @@ export const usersApi = {
       params: { limit, ...(cursor ? { cursor } : {}) },
     }),
 
+  getRetweets: (id: string, cursor?: string, limit = 20) =>
+    axiosInstance.get(`/users/${id}/retweets`, {
+      params: { limit, ...(cursor ? { cursor } : {}) },
+    }),
+
   updateMe: (data: { bio?: string; avatar?: string }) =>
     axiosInstance.put("/users/me", data),
 

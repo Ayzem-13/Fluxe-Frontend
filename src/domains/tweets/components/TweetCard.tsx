@@ -44,6 +44,9 @@ export function TweetCard({ tweet }: TweetCardProps) {
   const isLiked = isRetweet
     ? tweet.retweetOf!.likes.some((l) => l.userId === currentUser?.id)
     : tweet.likes.some((l) => l.userId === currentUser?.id);
+  const isRetweeted = isRetweet
+    ? tweet.retweetOf!.retweets?.some((r) => r.authorId === currentUser?.id)
+    : tweet.retweets?.some((r) => r.authorId === currentUser?.id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(tweet.content);
@@ -297,11 +300,17 @@ export function TweetCard({ tweet }: TweetCardProps) {
                 }}
                 className={cn(
                   "flex items-center gap-1.5 px-1.5 py-1 rounded-full transition-colors group",
-                  "text-muted-foreground hover:text-green-400 hover:bg-green-400/10",
+                  isRetweeted
+                    ? "text-green-400"
+                    : "text-muted-foreground hover:text-green-400 hover:bg-green-400/10",
                 )}
-                aria-label="Retweeter"
+                aria-label={isRetweeted ? "Annuler le retweet" : "Retweeter"}
               >
-                <Repeat2 className="size-4 transition-transform group-hover:scale-110" />
+                <Repeat2
+                  className={cn(
+                    "size-4 transition-transform group-hover:scale-110",
+                  )}
+                />
                 <span className="text-xs">{displayCounts.retweets}</span>
               </motion.button>
 

@@ -12,6 +12,7 @@ export interface Tweet {
   updatedAt: string;
   author: TweetAuthor;
   likes: { userId: string }[];
+  retweets: { authorId: string }[];
   _count: { likes: number; retweets: number };
   retweetOfId: string | null;
   retweetOf: {
@@ -21,6 +22,7 @@ export interface Tweet {
     createdAt: string;
     author: TweetAuthor;
     likes: { userId: string }[];
+    retweets: { authorId: string }[];
     _count: { likes: number; retweets: number };
   } | null;
 }

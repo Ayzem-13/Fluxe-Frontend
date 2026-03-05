@@ -1,12 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { UserProfileState } from "./types";
-import { getUserProfile, getUserTweets, toggleUserFollow } from "./service";
+import { getUserProfile, getUserTweets, getUserRetweets, toggleUserFollow } from "./service";
 import { likeTweet } from "@/domains/tweets/slice";
 
 const initialState: UserProfileState = {
   profile: null,
   tweets: [],
+  retweets: [],
   nextCursor: null,
+  retweetsNextCursor: null,
   isLoading: false,
   isFollowLoading: false,
   error: null,
@@ -39,6 +41,17 @@ export const toggleFollow = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       return await toggleUserFollow(userId);
+    } catch (err) {
+      return rejectWithValue((err as Error).message);
+    }
+  }
+);
+
+export const fetchUserRetweets = createAsyncThunk(
+  "userProfile/fetchRetweets",
+  async ({ userId, cursor }: { userId: string; cursor?: string }, { rejectWithValue }) => {
+    try {
+      return await getUserRetweets(userId, cursor);
     } catch (err) {
       return rejectWithValue((err as Error).message);
     }
@@ -108,6 +121,24 @@ const userProfileSlice = createSlice({
         } else {
           tweet.likes = tweet.likes.filter((l) => l.userId !== userId);
         }
+      })
+
+      .addCase(fetchUserRetweets.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUserRetweets.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const { tweets, nextCursor } = action.payload;
+        if (action.meta.arg.cursor) {
+          state.retweets = [...state.retweets, ...tweets];
+        } else {
+          state.retweets = tweets;
+        }
+        state.retweetsNextCursor = nextCursor;
+      })
+      .addCase(fetchUserRetweets.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
