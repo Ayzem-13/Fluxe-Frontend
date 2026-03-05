@@ -1,4 +1,4 @@
-export type NotificationType = "FOLLOW" | "LIKE";
+export type NotificationType = "FOLLOW" | "LIKE" | "LIKE_COMMENT" | "COMMENT" | "RETWEET";
 
 export interface NotificationUser {
   id: string;
@@ -15,6 +15,12 @@ export interface NotificationTweet {
   };
 }
 
+export interface NotificationComment {
+  id: string;
+  content: string;
+  tweetId: string;
+}
+
 export interface Notification {
   id: string;
   userId: string;
@@ -25,6 +31,7 @@ export interface Notification {
   createdAt: string;
   fromUser: NotificationUser;
   tweet: NotificationTweet | null;
+  comment: NotificationComment | null;
 }
 
 export interface NotificationsState {
